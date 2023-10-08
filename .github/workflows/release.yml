@@ -39,202 +39,202 @@ jobs:
           generateReleaseNotes: true
           discussionCategory: "Announcements"
 
-  meta-cli:
-    needs:
-      - check-bump
-    runs-on: "${{ matrix.os }}"
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            suffix: ""
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            suffix: ""
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            suffix: ""
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            suffix: ""
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            suffix: ""
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            suffix: ".exe"
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dsherret/rust-toolchain-file@v1
-        with:
-          targets: ${{ matrix.target }}
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ runner.os }}-${{ matrix.target }}
-      - run: |
-          # sometimes, dtolnay/rust-toolchain does not select the correct default target
-          rustup target add ${{ matrix.target }}
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: "--locked --release --package meta-cli --target ${{ matrix.target }}"
-      - run: |
-          cd target/${{ matrix.target }}/release
-          tar czvf ../../../meta-cli-${{ github.ref_name }}-${{ matrix.target }}.tar.gz "meta${{ matrix.suffix }}"
-      - uses: svenstaro/upload-release-action@v2
-        with:
-          tag: ${{ github.ref }}
-          file: "meta-cli-${{ github.ref_name }}-${{ matrix.target }}.tar.gz"
-          asset_name: "meta-cli-${{ github.ref_name }}-${{ matrix.target }}.tar.gz"
-          overwrite: false
+  # meta-cli:
+  #   needs:
+  #     - check-bump
+  #   runs-on: "${{ matrix.os }}"
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: macos-latest
+  #           target: x86_64-apple-darwin
+  #           suffix: ""
+  #         - os: macos-latest
+  #           target: aarch64-apple-darwin
+  #           suffix: ""
+  #         - os: ubuntu-latest
+  #           target: x86_64-unknown-linux-gnu
+  #           suffix: ""
+  #         - os: ubuntu-latest
+  #           target: x86_64-unknown-linux-musl
+  #           suffix: ""
+  #         - os: ubuntu-latest
+  #           target: aarch64-unknown-linux-gnu
+  #           suffix: ""
+  #         - os: windows-latest
+  #           target: x86_64-pc-windows-msvc
+  #           suffix: ".exe"
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: dsherret/rust-toolchain-file@v1
+  #       with:
+  #         targets: ${{ matrix.target }}
+  #     - uses: Swatinem/rust-cache@v2
+  #       with:
+  #         key: ${{ runner.os }}-${{ matrix.target }}
+  #     - run: |
+  #         # sometimes, dtolnay/rust-toolchain does not select the correct default target
+  #         rustup target add ${{ matrix.target }}
+  #     - uses: actions-rs/cargo@v1
+  #       with:
+  #         use-cross: true
+  #         command: build
+  #         args: "--locked --release --package meta-cli --target ${{ matrix.target }}"
+  #     - run: |
+  #         cd target/${{ matrix.target }}/release
+  #         tar czvf ../../../meta-cli-${{ github.ref_name }}-${{ matrix.target }}.tar.gz "meta${{ matrix.suffix }}"
+  #     - uses: svenstaro/upload-release-action@v2
+  #       with:
+  #         tag: ${{ github.ref }}
+  #         file: "meta-cli-${{ github.ref_name }}-${{ matrix.target }}.tar.gz"
+  #         asset_name: "meta-cli-${{ github.ref_name }}-${{ matrix.target }}.tar.gz"
+  #         overwrite: false
 
-  typegraph:
-    needs:
-      - check-bump
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dsherret/rust-toolchain-file@v1
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: ${{ runner.os }}-rust-${{ hashFiles('**/rust-toolchain.toml') }}-${{ hashFiles('**/Cargo.lock') }}
-      - uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: ${{ env.POETRY_VERSION }}
-      - uses: pnpm/action-setup@v2.4.0
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: ${{ env.DENO_VERSION }}
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: "poetry"
-      - env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          WASM_FILE: target/release/typegraph_core.wasm
-        run: |
-          curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -v $WASMEDGE_VERSION
-          export LD_LIBRARY_PATH="$HOME/.wasmedge/lib:$LD_LIBRARY_PATH"
-          cargo install wasm-tools --version $WASM_TOOLS_VERSION --locked
-          cargo install wasm-opt --version $WASM_OPT_VERSION --locked
+  # typegraph:
+  #   needs:
+  #     - check-bump
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: dsherret/rust-toolchain-file@v1
+  #     - uses: Swatinem/rust-cache@v2
+  #       with:
+  #         shared-key: ${{ runner.os }}-rust-${{ hashFiles('**/rust-toolchain.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+  #     - uses: abatilo/actions-poetry@v2
+  #       with:
+  #         poetry-version: ${{ env.POETRY_VERSION }}
+  #     - uses: pnpm/action-setup@v2.4.0
+  #       with:
+  #         version: ${{ env.PNPM_VERSION }}
+  #     - uses: denoland/setup-deno@v1
+  #       with:
+  #         deno-version: ${{ env.DENO_VERSION }}
+  #     - uses: actions/setup-python@v4
+  #       with:
+  #         python-version: ${{ env.PYTHON_VERSION }}
+  #         cache: "poetry"
+  #     - env:
+  #         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #         WASM_FILE: target/release/typegraph_core.wasm
+  #       run: |
+  #         curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -v $WASMEDGE_VERSION
+  #         export LD_LIBRARY_PATH="$HOME/.wasmedge/lib:$LD_LIBRARY_PATH"
+  #         cargo install wasm-tools --version $WASM_TOOLS_VERSION --locked
+  #         cargo install wasm-opt --version $WASM_OPT_VERSION --locked
 
-          cargo build -p typegraph_core --target wasm32-unknown-unknown -F wasm --release
-          wasm-opt -Oz target/wasm32-unknown-unknown/release/typegraph_core.wasm -o $WASM_FILE.opt
-          wasm-tools component new $WASM_FILE.opt -o $WASM_FILE
+  #         cargo build -p typegraph_core --target wasm32-unknown-unknown -F wasm --release
+  #         wasm-opt -Oz target/wasm32-unknown-unknown/release/typegraph_core.wasm -o $WASM_FILE.opt
+  #         wasm-tools component new $WASM_FILE.opt -o $WASM_FILE
 
-          poetry install
-          poetry run python -m wasmtime.bindgen $WASM_FILE --out-dir typegraph/python/typegraph/gen
+  #         poetry install
+  #         poetry run python -m wasmtime.bindgen $WASM_FILE --out-dir typegraph/python/typegraph/gen
 
-          cd typegraph/python
-          poetry install --sync
-          poetry build
-          poetry publish
-          cd ../..
+  #         cd typegraph/python
+  #         poetry install --sync
+  #         poetry build
+  #         poetry publish
+  #         cd ../..
 
-          npm install --global @bytecodealliance/jco@$JCO_VERSION
-          jco transpile $WASM_FILE -o typegraph/deno/src/gen --map "*=../imports.ts"
-          deno run -A typegraph/deno/dev/fix-declarations.ts
+  #         npm install --global @bytecodealliance/jco@$JCO_VERSION
+  #         jco transpile $WASM_FILE -o typegraph/deno/src/gen --map "*=../imports.ts"
+  #         deno run -A typegraph/deno/dev/fix-declarations.ts
 
-          cd typegraph/deno/src
-          deno run -A ../../../dev/publish.ts
-          cd ../../..
+  #         cd typegraph/deno/src
+  #         deno run -A ../../../dev/publish.ts
+  #         cd ../../..
 
-          cd typegraph/node
-          pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
-          pnpm publish
-      - uses: svenstaro/upload-release-action@v2
-        with:
-          tag: ${{ github.ref }}
-          file: "typegraph/python/dist/*"
-          file_glob: true
-          overwrite: false
+  #         cd typegraph/node
+  #         pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
+  #         pnpm publish
+  #     - uses: svenstaro/upload-release-action@v2
+  #       with:
+  #         tag: ${{ github.ref }}
+  #         file: "typegraph/python/dist/*"
+  #         file_glob: true
+  #         overwrite: false
 
-  typegate:
-    needs:
-      - check-bump
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: linux/amd64
-            runner: ubuntu-latest
-          - platform: linux/arm64
-            runner: custom-macos
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v5
-        id: build
-        with:
-          file: dev/Dockerfile
-          platforms: ${{ matrix.platform }}
-          target: prd
-          cache-from: type=registry,ref=${{ env.REGISTRY_IMAGE }}:latest
-          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-      - run: |
-          mkdir -p ./digests
-          digest="${{ steps.build.outputs.digest }}"
-          touch "./digests/${digest#sha256:}"
-      - uses: actions/upload-artifact@v3
-        with:
-          name: digests
-          path: ./digests/*
-          if-no-files-found: error
-          retention-days: 1
+  # typegate:
+  #   needs:
+  #     - check-bump
+  #   runs-on: ${{ matrix.runner }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - platform: linux/amd64
+  #           runner: ubuntu-latest
+  #         - platform: linux/arm64
+  #           runner: custom-macos
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: docker/setup-buildx-action@v3
+  #     - uses: docker/login-action@v3
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #     - uses: docker/build-push-action@v5
+  #       id: build
+  #       with:
+  #         file: dev/Dockerfile
+  #         platforms: ${{ matrix.platform }}
+  #         target: prd
+  #         cache-from: type=registry,ref=${{ env.REGISTRY_IMAGE }}:latest
+  #         outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+  #     - run: |
+  #         mkdir -p ./digests
+  #         digest="${{ steps.build.outputs.digest }}"
+  #         touch "./digests/${digest#sha256:}"
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: digests
+  #         path: ./digests/*
+  #         if-no-files-found: error
+  #         retention-days: 1
 
-  docker:
-    needs:
-      - typegate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: digests
-          path: ./digests
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - run: |
-          cd ./digests
-          docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ github.ref_name }} --tag ${{ env.REGISTRY_IMAGE }}:latest $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:latest
+  # docker:
+  #   needs:
+  #     - typegate
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: digests
+  #         path: ./digests
+  #     - uses: docker/setup-buildx-action@v3
+  #     - uses: docker/login-action@v3
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #     - run: |
+  #         cd ./digests
+  #         docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ github.ref_name }} --tag ${{ env.REGISTRY_IMAGE }}:latest $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+  #         docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:latest
 
-  bump:
-    needs:
-      - meta-cli
-      - typegraph
-      - typegate
-      - docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v${{ env.DENO_VERSION }}
-      - id: bump
-        run: |
-          deno run -A dev/lock.ts --bump prerelease
-          echo "version=$(deno run -A dev/lock.ts --version)" >> $GITHUB_OUTPUT
-      - uses: peter-evans/create-pull-request@v5
-        with:
-          branch: bump-${{ steps.bump.outputs.version }}
-          delete-branch: true
-          commit-message: "chore: prepare release ${{ steps.bump.outputs.version }}"
-          title: "chore: prepare release ${{ steps.bump.outputs.version }}"
-          body: "Automatic suggested bump"
-          base: main
+  # bump:
+  #   needs:
+  #     - meta-cli
+  #     - typegraph
+  #     - typegate
+  #     - docker
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: denoland/setup-deno@v1
+  #       with:
+  #         deno-version: v${{ env.DENO_VERSION }}
+  #     - id: bump
+  #       run: |
+  #         deno run -A dev/lock.ts --bump prerelease
+  #         echo "version=$(deno run -A dev/lock.ts --version)" >> $GITHUB_OUTPUT
+  #     - uses: peter-evans/create-pull-request@v5
+  #       with:
+  #         branch: bump-${{ steps.bump.outputs.version }}
+  #         delete-branch: true
+  #         commit-message: "chore: prepare release ${{ steps.bump.outputs.version }}"
+  #         title: "chore: prepare release ${{ steps.bump.outputs.version }}"
+  #         body: "Automatic suggested bump"
+  #         base: main
